@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.elasticsearch.overridedocumenthistoryprovider">
+
+  <require>org.nuxeo.ecm.platform.audit.PageProviderservice.es.contrib</require>
+
+  <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
+
+    <genericPageProvider class="org.nuxeo.elasticsearch.audit.pageprovider.ESDocumentHistoryFilteredDownloadPageProvider" name="DOCUMENT_HISTORY_PROVIDER">
+      <whereClause docType="BasicAuditSearch">
+        <predicate operator="BETWEEN" parameter="eventDate">
+          <field name="startDate" schema="basicauditsearch"/>
+          <field name="endDate" schema="basicauditsearch"/>
+        </predicate>
+        <predicate operator="IN" parameter="category">
+          <field name="eventCategories" schema="basicauditsearch"/>
+        </predicate>
+        <predicate operator="IN" parameter="eventId">
+          <field name="eventIds" schema="basicauditsearch"/>
+        </predicate>
+        <predicate operator="IN" parameter="principalName">
+          <field name="principalNames" schema="basicauditsearch"/>
+        </predicate>
+      </whereClause>
+      <sort ascending="false" column="eventDate"/>
+        <pageSize>10</pageSize>
+        <maxPageSize>1000</maxPageSize>
+    </genericPageProvider>
+
+  </extension>
+
+</component>

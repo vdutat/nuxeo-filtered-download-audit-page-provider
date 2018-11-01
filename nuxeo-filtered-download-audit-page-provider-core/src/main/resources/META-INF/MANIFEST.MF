@@ -1,0 +1,9 @@
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Manifest-Version: 1.0
+Bundle-Vendor: org.nuxeo.elasticsearch
+Bundle-Version: 1.0.0
+Bundle-Name: nuxeo-filtered-download-audit-page-provider-core
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.nuxeo.elasticsearch.nuxeo-filtered-download-audit-page-provider-core;singleton=true
+Nuxeo-Component: OSGI-INF/overridedocumenthistoryprovider-contrib.xml
