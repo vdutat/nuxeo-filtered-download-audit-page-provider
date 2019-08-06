@@ -7,249 +7,35 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.platform.audit.api.document.AdditionalDocumentAuditParams;
 import org.nuxeo.ecm.platform.audit.api.document.DocumentAuditHelper;
 import org.nuxeo.elasticsearch.audit.pageprovider.ESDocumentHistoryPageProvider;
+import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.services.config.ConfigurationService;
 
 public class ESDocumentHistoryFilteredDownloadPageProvider extends ESDocumentHistoryPageProvider {
 
+    private static final String SINGLEQUERY_PROPNAME = "nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery";
+
+    private static final String COMPLEXQUERY_PROPNAME = "nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery";
+
     protected Log log = LogFactory.getLog(ESDocumentHistoryFilteredDownloadPageProvider.class);
-
-    protected static String singleQuery_nofilter = "            {\n" + "                \"bool\" : {\n"
-            + "                  \"must\" : {\n" + "                    \"match\" : {\n"
-            + "                      \"docUUID\" : {\n" + "                        \"query\" : \"?\",\n"
-            + "                        \"type\" : \"boolean\"\n" + "                      }\n"
-            + "                    }\n" + "                  }\n" + "                }\n"
-            + "              }          \n" + "";
-
-    protected static String singleQuery = "{\n" + 
-            "    \"bool\" : {\n" + 
-            "      \"must\" : [\n" + 
-            "        {\n" + 
-            "          \"constant_score\" : {\n" + 
-            "            \"filter\" : {\n" + 
-            "              \"term\" : {\n" + 
-            "                \"docUUID\" : {\n" + 
-            "                  \"value\" : \"?\",\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              }\n" + 
-            "            },\n" + 
-            "            \"boost\" : 1.0\n" + 
-            "          }\n" + 
-            "        },\n" + 
-            "        {\n" + 
-            "          \"bool\" : {\n" + 
-            "            \"should\" : [\n" + 
-            "              {\n" + 
-            "                \"bool\" : {\n" + 
-            "                  \"must\" : [\n" + 
-            "                    {\n" + 
-            "                      \"constant_score\" : {\n" + 
-            "                        \"filter\" : {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"eventId\" : {\n" + 
-            "                              \"value\" : \"download\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        },\n" + 
-            "                        \"boost\" : 1.0\n" + 
-            "                      }\n" + 
-            "                    },\n" + 
-            "                    {\n" + 
-            "                      \"constant_score\" : {\n" + 
-            "                        \"filter\" : {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"extended.blobXPath\" : {\n" + 
-            "                              \"value\" : \"file:content\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        },\n" + 
-            "                         \"boost\" : 1.0\n" + 
-            "                      }\n" + 
-            "                    }\n" + 
-            "                  ],\n" + 
-            "                  \"disable_coord\" : false,\n" + 
-            "                  \"adjust_pure_negative\" : true,\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              },\n" + 
-            "              {\n" + 
-            "                \"constant_score\" : {\n" + 
-            "                  \"filter\" : {\n" + 
-            "                    \"bool\" : {\n" + 
-            "                      \"must_not\" : [\n" + 
-            "                        {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"eventId\" : {\n" + 
-            "                              \"value\" : \"download\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        }\n" + 
-            "                      ],\n" + 
-            "                      \"disable_coord\" : false,\n" + 
-            "                      \"adjust_pure_negative\" : true,\n" + 
-            "                      \"boost\" : 1.0\n" + 
-            "                    }\n" + 
-            "                  },\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              }\n" + 
-            "            ],\n" + 
-            "            \"disable_coord\" : false,\n" + 
-            "            \"adjust_pure_negative\" : true,\n" + 
-            "            \"boost\" : 1.0\n" + 
-            "          }\n" + 
-            "        }\n" + 
-            "      ],\n" + 
-            "      \"disable_coord\" : false,\n" + 
-            "      \"adjust_pure_negative\" : true,\n" + 
-            "      \"boost\" : 1.0\n" + 
-            "    }\n" + 
-            "  }\n";
-
-    protected static String complexQuery_old = "{\n" +  //
-            "    \"bool\": {\n" +  //
-            "      \"should\": [\n" +  //
-            "        {\n" +  //
-            "          \"term\": {\n" +  //
-            "            \"docUUID\": \"?\"\n" +  //
-            "          }\n" +  //
-            "        },\n" +  //
-            "        {\n" +  //
-            "          \"bool\": {\n" +  //
-            "            \"must\": [\n" +  //
-            "              {\n" +  //
-            "                \"term\": {\n" +  //
-            "                  \"docUUID\": \"?\"\n" +  //
-            "                }\n" +  //
-            "              },\n" +  //
-            "              {\n" +  //
-            "                \"range\": {\n" +  //
-            "                  \"eventDate\": {\n" +  //
-            "                    \"lte\": \"?\"\n" +  //
-            "                  }\n" +  //
-            "                }\n" +  //
-            "              }\n" +  //
-            "            ]\n" +  //
-            "          }\n" +  //
-            "        }\n" +  //
-            "      ]\n" +  //
-            "    }\n" +  //
-            "}\n";
-
-    protected static String complexQuery = "{\n" + 
-            "    \"bool\" : {\n" + 
-            "      \"must\" : [\n" + 
-            "        {\n" + 
-            "          \"constant_score\" : {\n" + 
-            "            \"filter\" : {\n" + 
-            "              \"term\" : {\n" + 
-            "                \"docUUID\" : {\n" + 
-            "                  \"value\" : \"?\",\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              }\n" + 
-            "            },\n" + 
-            "            \"boost\" : 1.0\n" + 
-            "          }\n" + 
-            "        },\n" + 
-            "              {\n" +  //
-            "                \"range\": {\n" +  //
-            "                  \"eventDate\": {\n" +  //
-            "                    \"lte\": \"?\"\n" +  //
-            "                  }\n" +  //
-            "                }\n" +  //
-            "              },\n" +  //
-            "        {\n" + 
-            "          \"bool\" : {\n" + 
-            "            \"should\" : [\n" + 
-            "              {\n" + 
-            "                \"bool\" : {\n" + 
-            "                  \"must\" : [\n" + 
-            "                    {\n" + 
-            "                      \"constant_score\" : {\n" + 
-            "                        \"filter\" : {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"eventId\" : {\n" + 
-            "                              \"value\" : \"download\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        },\n" + 
-            "                        \"boost\" : 1.0\n" + 
-            "                      }\n" + 
-            "                    },\n" + 
-            "                    {\n" + 
-            "                      \"constant_score\" : {\n" + 
-            "                        \"filter\" : {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"extended.blobXPath\" : {\n" + 
-            "                              \"value\" : \"file:content\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        },\n" + 
-            "                         \"boost\" : 1.0\n" + 
-            "                      }\n" + 
-            "                    }\n" + 
-            "                  ],\n" + 
-            "                  \"disable_coord\" : false,\n" + 
-            "                  \"adjust_pure_negative\" : true,\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              },\n" + 
-            "              {\n" + 
-            "                \"constant_score\" : {\n" + 
-            "                  \"filter\" : {\n" + 
-            "                    \"bool\" : {\n" + 
-            "                      \"must_not\" : [\n" + 
-            "                        {\n" + 
-            "                          \"term\" : {\n" + 
-            "                            \"eventId\" : {\n" + 
-            "                              \"value\" : \"download\",\n" + 
-            "                              \"boost\" : 1.0\n" + 
-            "                            }\n" + 
-            "                          }\n" + 
-            "                        }\n" + 
-            "                      ],\n" + 
-            "                      \"disable_coord\" : false,\n" + 
-            "                      \"adjust_pure_negative\" : true,\n" + 
-            "                      \"boost\" : 1.0\n" + 
-            "                    }\n" + 
-            "                  },\n" + 
-            "                  \"boost\" : 1.0\n" + 
-            "                }\n" + 
-            "              }\n" + 
-            "            ],\n" + 
-            "            \"disable_coord\" : false,\n" + 
-            "            \"adjust_pure_negative\" : true,\n" + 
-            "            \"boost\" : 1.0\n" + 
-            "          }\n" + 
-            "        }\n" + 
-            "      ],\n" + 
-            "      \"disable_coord\" : false,\n" + 
-            "      \"adjust_pure_negative\" : true,\n" + 
-            "      \"boost\" : 1.0\n" + 
-            "    }\n" + 
-            "  }\n";
 
     private static final long serialVersionUID = 1L;
 
-
     @Override
     protected String getFixedPart() {
+        String query = "";
         if (getParameters().length == 2) {
+            query = Framework.getService(ConfigurationService.class).getProperty(COMPLEXQUERY_PROPNAME, complexQuery);
             if (log.isTraceEnabled()) {
                 log.trace("parameters: " + getParameters());
-                log.trace(complexQuery);
+                log.trace(query);
             }
-            return complexQuery;
+            return query;
         } else {
+            query = Framework.getService(ConfigurationService.class).getProperty(SINGLEQUERY_PROPNAME, singleQuery);
             if (log.isTraceEnabled()) {
-                log.trace(singleQuery);
+                log.trace(query);
             }
-            return singleQuery;
+            return query;
         }
     }
 

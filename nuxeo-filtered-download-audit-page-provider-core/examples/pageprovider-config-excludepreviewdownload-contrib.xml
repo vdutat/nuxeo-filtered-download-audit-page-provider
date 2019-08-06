@@ -1,0 +1,53 @@
+<component name="ESDocumentHistoryFilteredDownloadPageProvider.config.excludepreviewdownload" >
+
+<require>ESDocumentHistoryFilteredDownloadPageProvider.config.default</require>
+<extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
+  
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
+ "bool" : { 
+   "must" : [ 
+     { "term" : { "docUUID" : "?" } },
+     {
+       "bool" : {
+         "must_not" : [
+          {
+           "bool": {
+             "must": [
+               { "term" : { "eventId" : "download" } },
+               { "term" : { "extended.downloadReason" : "preview" } }
+             ]
+           }
+          }
+         ]
+       }
+     }
+   ]
+ } 
+}</property>
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery">{
+ "bool" : { 
+   "must" : [ 
+     { "term" : { "docUUID" : "?" } },
+     { "range": { "eventDate": { "lte": "?" } } },
+     {
+       "bool" : {
+         "must_not" : [
+          {
+           "bool": {
+             "must": [
+               { "term" : { "eventId" : "download" } },
+               { "term" : { "extended.downloadReason" : "preview" } }
+             ]
+           }
+          }
+         ]
+       }
+     }
+   ]
+ } 
+}</property>
+
+</extension>
+
+</component>
+

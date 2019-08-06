@@ -1,0 +1,26 @@
+<component name="ESDocumentHistoryFilteredDownloadPageProvider.config.default" >
+
+<extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
+  
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
+  "bool" : {
+    "must" : {
+      "term" : { "docUUID" : "?" }
+    }
+  }
+}
+  </property>
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery">{
+  "bool": {
+    "must": [
+      { "term": { "docUUID": "?" } },
+      { "range": { "eventDate": { "lte": "?" } } }
+    ]
+  }
+}
+  </property>
+
+</extension>
+
+</component>
+
