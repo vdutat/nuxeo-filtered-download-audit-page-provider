@@ -1,6 +1,6 @@
 # nuxeo-filtered-download-audit-page-provider
 
-This plug-in redefines **ES** page provider `DOCUMENT_HISTORY_PROVIDER` in order to filter out `download` events if not related to a blob stored in `file:content`.
+This plug-in redefines **ES** page provider `DOCUMENT_HISTORY_PROVIDER` in order to easily customize its ES DSL queries.
 
 # Requirements
 
@@ -19,6 +19,39 @@ cd nuxeo-filtered-download-audit-page-provider
 
 mvn clean install
 ```
+
+# Configuration
+
+By default, page provider `DOCUMENT_HISTORY_PROVIDER` gets either 1 or 2 parameters, depending on the use case. Therefore 2 **ES DSL** queries. Here is the default configuration:
+```xml
+<component name="ESDocumentHistoryFilteredDownloadPageProvider.config.default" >
+
+<extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
+  
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
+  "bool" : {
+    "must" : {
+      "term" : { "docUUID" : "?" }
+    }
+  }
+}
+  </property>
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery">{
+  "bool": {
+    "must": [
+      { "term": { "docUUID": "?" } },
+      { "range": { "eventDate": { "lte": "?" } } }
+    ]
+  }
+}
+  </property>
+
+</extension>
+
+</component>
+```
+
+Override the **configration properties** `nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery` and `nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery` in order to customize the queries to your need.
 
 # Installation
 
