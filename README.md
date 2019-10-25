@@ -53,6 +53,65 @@ By default, page provider `DOCUMENT_HISTORY_PROVIDER` gets either 1 or 2 paramet
 
 Override the **configration properties** `nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery` and `nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery` in order to customize the queries to your need.
 
+Here is an example using a **Studio XML extension**, which excludes the `download` audit log entries that are not the main blob nor the attachments:
+```xml
+<require>ESDocumentHistoryFilteredDownloadPageProvider.config.default</require>
+<extension point="configuration" target="org.nuxeo.runtime.ConfigurationService">
+
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
+ "bool" : { 
+      "must" : [
+        { "term": { "docUUID": "?" } },
+        { "bool": {
+          "should": [
+            { "bool": {
+              "must": [
+                { "term": { "eventId": { "value": "download" } } },
+                { "bool": {
+                  "should": [
+                    { "term": { "extended.blobXPath": "file:content" } },
+                    { "prefix": { "extended.blobXPath": "files:files" } }
+                  ]
+                } }
+              ]
+            } },
+            { "bool": {
+              "must_not": [ { "term": { "eventId": "download" } } ]
+            } }
+          ]
+        } }
+      ]
+ } 
+}</property>
+  <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery">{
+ "bool" : { 
+      "must" : [
+        { "term": { "docUUID": "?" } },
+        { "range": { "eventDate": { "lte": "?" } } },
+        { "bool": {
+          "should": [
+            { "bool": {
+              "must": [
+                { "term": { "eventId": { "value": "download" } } },
+                { "bool": {
+                  "should": [
+                    { "term": { "extended.blobXPath": "file:content" } },
+                    { "prefix": { "extended.blobXPath": "files:files" } }
+                  ]
+                } }
+              ]
+            } },
+            { "bool": {
+              "must_not": [ { "term": { "eventId": "download" } } ]
+            } }
+          ]
+        } }
+      ]
+ } 
+}</property>
+
+</extension>
+```
 # Installation
 
 ```
