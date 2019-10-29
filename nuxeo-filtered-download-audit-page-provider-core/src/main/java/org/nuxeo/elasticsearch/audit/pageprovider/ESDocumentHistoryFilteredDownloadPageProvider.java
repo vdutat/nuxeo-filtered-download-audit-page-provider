@@ -1,20 +1,17 @@
 package org.nuxeo.elasticsearch.audit.pageprovider;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.platform.audit.api.document.AdditionalDocumentAuditParams;
-import org.nuxeo.ecm.platform.audit.api.document.DocumentAuditHelper;
-import org.nuxeo.elasticsearch.audit.pageprovider.ESDocumentHistoryPageProvider;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.services.config.ConfigurationService;
 
 public class ESDocumentHistoryFilteredDownloadPageProvider extends ESDocumentHistoryPageProvider {
 
-    private static final String SINGLEQUERY_PROPNAME = "nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery";
+    protected static final String SINGLEQUERY_PROPNAME_PATTERN = "nuxeo.elasticsearch.audit.pageprovider.%s.singleQuery";
 
-    private static final String COMPLEXQUERY_PROPNAME = "nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery";
+    protected static final String COMPLEXQUERY_PROPNAME_PATTERN = "nuxeo.elasticsearch.audit.pageprovider.%s.complexQuery";
 
     protected Log log = LogFactory.getLog(ESDocumentHistoryFilteredDownloadPageProvider.class);
 
@@ -24,15 +21,16 @@ public class ESDocumentHistoryFilteredDownloadPageProvider extends ESDocumentHis
     protected String getFixedPart() {
         String query = "";
         if (getParameters().length == 2) {
-            query = Framework.getService(ConfigurationService.class).getProperty(COMPLEXQUERY_PROPNAME, complexQuery);
+            query = Framework.getService(ConfigurationService.class).getProperty(String.format(COMPLEXQUERY_PROPNAME_PATTERN, getDefinition().getName()), complexQuery);
             if (log.isTraceEnabled()) {
-                log.trace("parameters: " + getParameters());
+                log.trace("parameters: " + Arrays.deepToString(Arrays.stream(getParameters()).map(Object::toString).toArray(String[]::new)));
                 log.trace(query);
             }
             return query;
         } else {
-            query = Framework.getService(ConfigurationService.class).getProperty(SINGLEQUERY_PROPNAME, singleQuery);
+            query = Framework.getService(ConfigurationService.class).getProperty(String.format(SINGLEQUERY_PROPNAME_PATTERN, getDefinition().getName()), singleQuery);
             if (log.isTraceEnabled()) {
+                log.trace("parameters: " + Arrays.deepToString(Arrays.stream(getParameters()).map(Object::toString).toArray(String[]::new)));
                 log.trace(query);
             }
             return query;

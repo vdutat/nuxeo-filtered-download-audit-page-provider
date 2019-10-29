@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.elasticsearch.overridedocumenthistoryprovider">
 
-  <require>org.nuxeo.ecm.platform.audit.PageProviderservice.es.contrib</require>
+  <require>org.nuxeo.ecm.platform.audit.PageProviderservice.contrib</require>
 
   <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
 

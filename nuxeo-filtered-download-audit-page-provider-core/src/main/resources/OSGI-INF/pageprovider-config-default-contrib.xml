@@ -1,6 +1,6 @@
 <component name="ESDocumentHistoryFilteredDownloadPageProvider.config.default" >
 
-<extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
+<extension point="configuration" target="org.nuxeo.runtime.ConfigurationService">
   
   <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
   "bool" : {

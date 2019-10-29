@@ -9,7 +9,7 @@
 
   <groupId>org.nuxeo.elasticsearch</groupId>
   <artifactId>nuxeo-filtered-download-audit-page-provider-parent</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <name>Nuxeo filtered download audit page provider parent</name>
   <description/>
   <packaging>pom</packaging>

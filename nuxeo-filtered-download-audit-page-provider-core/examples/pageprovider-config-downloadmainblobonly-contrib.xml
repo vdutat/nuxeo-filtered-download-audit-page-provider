@@ -4,190 +4,46 @@
 <extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
   
   <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.singleQuery">{
-    "bool" : {
+ "bool" : { 
       "must" : [
-        {
-          "constant_score" : {
-            "filter" : {
-              "term" : {
-                "docUUID" : {
-                  "value" : "?",
-                  "boost" : 1.0
-                }
-              }
-            },
-            "boost" : 1.0
-          }
-        },
-        {
-          "bool" : {
-            "should" : [
-              {
-                "bool" : {
-                  "must" : [
-                    {
-                      "constant_score" : {
-                        "filter" : {
-                          "term" : {
-                            "eventId" : {
-                              "value" : "download",
-                              "boost" : 1.0
-                            }
-                          }
-                        },
-                        "boost" : 1.0
-                      }
-                    },
-                    {
-                      "constant_score" : {
-                        "filter" : {
-                          "term" : {
-                            "extended.blobXPath" : {
-                              "value" : "file:content",
-                              "boost" : 1.0
-                            }
-                          }
-                        },
-                         "boost" : 1.0
-                      }
-                    }
-                  ],
-                  "disable_coord" : false,
-                  "adjust_pure_negative" : true,
-                  "boost" : 1.0
-                }
-              },
-              {
-                "constant_score" : {
-                  "filter" : {
-                    "bool" : {
-                      "must_not" : [
-                        {
-                          "term" : {
-                            "eventId" : {
-                              "value" : "download",
-                              "boost" : 1.0
-                            }
-                          }
-                        }
-                      ],
-                      "disable_coord" : false,
-                      "adjust_pure_negative" : true,
-                      "boost" : 1.0
-                    }
-                  },
-                  "boost" : 1.0
-                }
-              }
-            ],
-            "disable_coord" : false,
-            "adjust_pure_negative" : true,
-            "boost" : 1.0
-          }
-        }
-      ],
-      "disable_coord" : false,
-      "adjust_pure_negative" : true,
-      "boost" : 1.0
-    }
-  }
-  </property>
+        { "term": { "docUUID": "?" } },
+        { "bool": {
+          "should": [
+            { "bool": {
+              "must": [
+                { "term": { "eventId": { "value": "download" } } },
+                { "term": { "extended.blobXPath": "file:content" } }
+              ]
+            } },
+            { "bool": {
+              "must_not": [ { "term": { "eventId": "download" } } ]
+            } }
+          ]
+        } }
+      ]
+ } 
+}</property>
   <property name="nuxeo.elasticsearch.audit.pageprovider.DOCUMENT_HISTORY_PROVIDER.complexQuery">{
-    "bool" : {
+ "bool" : { 
       "must" : [
-        {
-          "constant_score" : {
-            "filter" : {
-              "term" : {
-                "docUUID" : {
-                  "value" : "?",
-                  "boost" : 1.0
-                }
-              }
-            },
-            "boost" : 1.0
-          }
-        },
-              { //
-                "range": { //
-                  "eventDate": { //
-                    "lte": "?" //
-                  } //
-                } //
-              }, //
-        {
-          "bool" : {
-            "should" : [
-              {
-                "bool" : {
-                  "must" : [
-                    {
-                      "constant_score" : {
-                        "filter" : {
-                          "term" : {
-                            "eventId" : {
-                              "value" : "download",
-                              "boost" : 1.0
-                            }
-                          }
-                        },
-                        "boost" : 1.0
-                      }
-                    },
-                    {
-                      "constant_score" : {
-                        "filter" : {
-                          "term" : {
-                            "extended.blobXPath" : {
-                              "value" : "file:content",
-                              "boost" : 1.0
-                            }
-                          }
-                        },
-                         "boost" : 1.0
-                      }
-                    }
-                  ],
-                  "disable_coord" : false,
-                  "adjust_pure_negative" : true,
-                  "boost" : 1.0
-                }
-              },
-              {
-                "constant_score" : {
-                  "filter" : {
-                    "bool" : {
-                      "must_not" : [
-                        {
-                          "term" : {
-                            "eventId" : {
-                              "value" : "download",
-                              "boost" : 1.0
-                            }
-                          }
-                        }
-                      ],
-                      "disable_coord" : false,
-                      "adjust_pure_negative" : true,
-                      "boost" : 1.0
-                    }
-                  },
-                  "boost" : 1.0
-                }
-              }
-            ],
-            "disable_coord" : false,
-            "adjust_pure_negative" : true,
-            "boost" : 1.0
-          }
-        }
-      ],
-      "disable_coord" : false,
-      "adjust_pure_negative" : true,
-      "boost" : 1.0
-    }
-  }
-  </property>
+        { "term": { "docUUID": "?" } },
+        { "range": { "eventDate": { "lte": "?" } } },
+        { "bool": {
+          "should": [
+            { "bool": {
+              "must": [
+                { "term": { "eventId": { "value": "download" } } },
+                { "term": { "extended.blobXPath": "file:content" } }
+              ]
+            } },
+            { "bool": {
+              "must_not": [ { "term": { "eventId": "download" } } ]
+            } }
+          ]
+        } }
+      ]
+ } 
+}</property>
 
 </extension>
 
